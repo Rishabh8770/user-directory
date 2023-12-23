@@ -1,21 +1,36 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
+import UsersPosts from './UsersPostsCards'
+import Stopwatch from './Stopwatch'
 
-export default function UserDetails() {
-
+const UserDetails = () => {
+  const [userData, setUserData] = useState({});
   const [continentData, setContinentData] = useState([]);
+  const [stopwatchRunning, setStopwatchRunning] = useState(true);
 
   const handleBack = () => {
-    window.location.href = "/"
-  }
+    window.location.href = "/";
+  };
+
   useEffect(() => {
+    const userId = window.location.pathname.split("/")[2];
+
+    // Fetch user details from JSONPlaceholder API
+    fetch(`https://jsonplaceholder.typicode.com/users/${userId}`)
+      .then((response) => response.json())
+      .then((user) => setUserData(user))
+      .catch((error) => console.error("Error fetching user details:", error));
+  }, []);
+
+  useEffect(() => {
+    // Fetch continent data from World Time API
     fetch("http://worldtimeapi.org/api/timezone")
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         const continentMap = new Map();
 
-        data.forEach(timezone => {
+        data.forEach((timezone) => {
           const [continent, country] = timezone.split("/");
-          
+
           if (!continentMap.has(continent)) {
             continentMap.set(continent, [country]);
           } else {
@@ -30,17 +45,18 @@ export default function UserDetails() {
 
         setContinentData(continents);
       })
-      .catch(error => console.error("Error fetching countries:", error));
+      .catch((error) => console.error("Error fetching countries:", error));
   }, []);
 
   return (
-    <div className="container" >
-    
+    <div className="container">
       <h5 className="text-center my-3">User Details</h5>
-      <div className="d-flex flex-column details-section" style={{border: "1px solid black", borderRadius: "5px"}}>
-      <div className="d-flex justify-content-between">
-        <button className="btn-back btn-primary m-2" onClick={handleBack}>Back</button>
-        <select className="m-2">
+      <div className="d-flex flex-column details-section mb-4" style={{ border: "1px solid black", borderRadius: "5px" }}>
+        <div className="d-flex justify-content-between">
+          <button className="btn-back btn-primary m-2" onClick={handleBack}>
+            Back
+          </button>
+          <select className="m-2">
             <option value="">Select Country</option>
             {continentData.map(({ continent, countries }, index) => (
               <React.Fragment key={index}>
@@ -53,21 +69,23 @@ export default function UserDetails() {
               </React.Fragment>
             ))}
           </select>
-        <div className="m-2">timer</div>
-        <button className="start-pause btn-success m-2">Pause/Start</button>
+          <Stopwatch running={stopwatchRunning} />
+        </div>
+
+        <div className="d-flex justify-content-between profile-section p-3 mx-3 my-5" style={{ border: "1px solid black", borderRadius: "15px" }}>
+          <div>
+            <p>{userData.name}</p>
+            <p>{userData.username} | {userData.company && userData.company.catchPhrase}</p>
+          </div>
+          <div>
+            <p>{userData.address && userData.address.city}</p>
+            <p>{userData.email} | {userData.phone}</p>
+          </div>
+        </div>
+        <UsersPosts userId={userData.id}/>
       </div>
-    
-    <div className="d-flex justify-content-between profile-section p-3 mx-3 my-5" style={{border: "1px solid black", borderRadius: "15px"}}>
-      <div>
-        <p>Name</p>
-        <p>Username | Catch Phrase</p>
-      </div>
-      <div>
-        <p>Address</p>
-        <p>Email | Phone</p>
-      </div>
-    </div>
-    </div>
     </div>
   );
-}
+};
+
+export default UserDetails;

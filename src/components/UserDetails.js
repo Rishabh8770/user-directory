@@ -14,7 +14,6 @@ const UserDetails = () => {
   useEffect(() => {
     const userId = window.location.pathname.split("/")[2];
 
-    // Fetch user details from JSONPlaceholder API
     fetch(`https://jsonplaceholder.typicode.com/users/${userId}`)
       .then((response) => response.json())
       .then((user) => setUserData(user))
@@ -22,7 +21,6 @@ const UserDetails = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch continent data from World Time API
     fetch("http://worldtimeapi.org/api/timezone")
       .then((response) => response.json())
       .then((data) => {
